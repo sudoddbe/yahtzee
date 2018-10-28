@@ -20,22 +20,62 @@ Class Scorecard:
             'yahtzee'
         ]
         scoring_functions = [
-            score_ones(),
-            score_twos(),
-            score_threes(),
-            score_fours(),
-            score_fives(),
-            score_sixes(),
-            score_pair(),
-            score_three_of_a_kind(),
-            score_four_of_a_kind(),
-            score_full_house(),
-            score_small_straight(),
-            score_large_straight(),
-            score_yahtzee()
+            self.score_ones(face = 1),
+            self.score_twos(face = 2),
+            self.score_threes(face = 3),
+            self.score_fours(face = 4),
+            self.score_fives(face = 5),
+            self.score_sixes(face = 6),
+            self.score_pair(n = 2),
+            self.score_three_of_a_kind(n = 3),
+            self.score_four_of_a_kind((n = 4)),
+            self.score_full_house(),
+            self.score_small_straight(),
+            self.score_large_straight(),
+            self.score_yahtzee()
         ]
         self.categories = [Category(label, scoring_function) for label, scoring_function in zip(labels, scoring_functions)]
+    def score_face(self, rolls, face):
+        score = 0
+        for roll in rolls:
+            if roll == face:
+                score +=face
+        return score
 
+    def score_n_of_a_kind(self, rolls, n):
+        last_roll = 7
+        rolls_in_a_row = 0
+        for roll in rolls[::-1]:
+            assert last_roll >= roll
+            if roll == last_roll:
+                #highest n-of-a-kind found (assumes sorted rolls)
+                rolls_in_a_row += 1
+                if rolls_in_a_row == n:
+                    return n*roll
+            else:
+                last_roll = roll
+                rolls_in_a_row = 0
+        return 0
+
+    #NOT FINISHED
+    def score_full_house(self, rolls):
+        last_roll = 7
+        rolls_in_a_row = 0
+        three_of_a_kind_score = 0
+        pair_score = 0
+        for roll in rolls[::-1]:
+            assert last_roll >= roll
+            if roll == last_roll:
+                rolls_in_a_row += 1
+                if rolls_in_a_row == 3:
+                    three_of_a_kind_score 3*roll
+            else:
+                if rolls_in_a_row == 2:
+                    pair_score = 2*rolls
+                    if three_of_kind_score
+                last_roll = roll
+                rolls_in_a_row = 0
+        return 0
 
 class Category():
     def __init__(self, name, scoring_function)
