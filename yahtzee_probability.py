@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.special import factorial
 def tuple_is_subset(big_set, small_set):
-    N_small = len(small_set) 
+    N_small = len(small_set)
     if N_small == 0:
         return (True, big_set)
     N_big = len(big_set)
@@ -23,7 +23,7 @@ def roll_probability(wanted_rolls):
             repitions[dv] += wr == dv
     probability = factorial(rolls) *(1.0/6.0)**rolls
     probability /= np.prod(factorial(np.array(repitions.values())))
-    return probability 
+    return probability
 
 def dice_probability_dict(input_sets, output_sets):
     forward_probability_dict = {input_set : {} for input_set in input_sets}
@@ -37,7 +37,7 @@ def dice_probability_dict(input_sets, output_sets):
             else:
                 #Currently no consideration of combinations...
                 probability = roll_probability(diff_set)
-                forward_probability_dict[input_set][output_set] = probability 
-                reverse_probability_dict[output_set][input_set] = probability 
+                forward_probability_dict[input_set][output_set] = probability
+                reverse_probability_dict[output_set][input_set] = probability
     return forward_probability_dict, reverse_probability_dict
 

@@ -1,4 +1,4 @@
-from yahtzee_probability import dice_probability_dict 
+from yahtzee_probability import dice_probability_dict
 import numpy as np
 
 class Scorecard:
@@ -65,13 +65,13 @@ class Scorecard:
 
     def score_two_of_a_kind(self, rolls):
         return self.score_n_of_a_kind(rolls, n = 2)
-    
+
     def score_three_of_a_kind(self, rolls):
         return self.score_n_of_a_kind(rolls, n = 3)
-    
+
     def score_four_of_a_kind(self, rolls):
         return self.score_n_of_a_kind(rolls, n = 4)
-    
+
     def score_n_of_a_kind(self, rolls, n):
         rolls_in_a_row = 0
         bins = np.bincount(rolls)
@@ -95,12 +95,12 @@ class Scorecard:
     def score_small_straight(self, rolls):
         if rolls == (1,2,3,4,5):
             return 1 + 2+ 3+ 4+ 5
-        return 0 
+        return 0
 
     def score_large_straight(self, rolls):
         if rolls == (2,3,4,5,6):
             return  2+ 3+ 4+ 5 +6
-        return 0 
+        return 0
 
     def score_yahtzee(self, rolls):
         bins = np.bincount(rolls)

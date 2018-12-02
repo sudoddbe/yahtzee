@@ -1,5 +1,5 @@
-from yahtzee_probability import dice_probability_dict 
-from yahtzee_scorecard import Scorecard 
+from yahtzee_probability import dice_probability_dict
+from yahtzee_scorecard import Scorecard
 import numpy as np
 
 def test_create_scorecard():
@@ -72,57 +72,57 @@ def test_all_scoring():
 
     roll = (1,2,5,5,6)
     expected_scores = { name:0 for name in names}
-    expected_scores['ones'] = 1 
-    expected_scores['twos'] = 2 
-    expected_scores['fives'] = 2*5 
-    expected_scores['sixes'] = 6 
-    expected_scores['pair'] = 2*5 
+    expected_scores['ones'] = 1
+    expected_scores['twos'] = 2
+    expected_scores['fives'] = 2*5
+    expected_scores['sixes'] = 6
+    expected_scores['pair'] = 2*5
     test_scoring(roll, expected_scores)
 
     roll = (1,5,5,5,6)
     expected_scores = { name:0 for name in names}
-    expected_scores['ones'] = 1 
-    expected_scores['fives'] = 3*5 
-    expected_scores['sixes'] = 6 
-    expected_scores['pair'] = 2*5 
-    expected_scores['three_of_a_kind'] = 3*5 
+    expected_scores['ones'] = 1
+    expected_scores['fives'] = 3*5
+    expected_scores['sixes'] = 6
+    expected_scores['pair'] = 2*5
+    expected_scores['three_of_a_kind'] = 3*5
     test_scoring(roll, expected_scores)
 
     roll = (1,5,5,5,5)
     expected_scores = { name:0 for name in names}
-    expected_scores['ones'] = 1 
-    expected_scores['fives'] = 4*5 
-    expected_scores['pair'] = 2*5 
-    expected_scores['three_of_a_kind'] = 3*5 
-    expected_scores['four_of_a_kind'] = 4*5 
+    expected_scores['ones'] = 1
+    expected_scores['fives'] = 4*5
+    expected_scores['pair'] = 2*5
+    expected_scores['three_of_a_kind'] = 3*5
+    expected_scores['four_of_a_kind'] = 4*5
     test_scoring(roll, expected_scores)
 
     roll = (5,5,5,6,6)
     expected_scores = { name:0 for name in names}
-    expected_scores['fives'] = 3*5 
-    expected_scores['sixes'] = 2*6 
-    expected_scores['pair'] = 2*6 
-    expected_scores['three_of_a_kind'] = 3*5 
+    expected_scores['fives'] = 3*5
+    expected_scores['sixes'] = 2*6
+    expected_scores['pair'] = 2*6
+    expected_scores['three_of_a_kind'] = 3*5
     expected_scores['full_house'] = np.sum(roll)
     test_scoring(roll, expected_scores)
 
     roll = (1,2,3,4,5)
     expected_scores = { name:0 for name in names}
-    expected_scores['ones'] = 1 
-    expected_scores['twos'] = 2 
-    expected_scores['threes'] = 3 
-    expected_scores['fours'] = 4 
-    expected_scores['fives'] = 5 
+    expected_scores['ones'] = 1
+    expected_scores['twos'] = 2
+    expected_scores['threes'] = 3
+    expected_scores['fours'] = 4
+    expected_scores['fives'] = 5
     expected_scores['small_straight'] = np.sum(roll)
     test_scoring(roll, expected_scores)
 
     roll = (2,3,4,5,6)
     expected_scores = { name:0 for name in names}
-    expected_scores['twos'] = 2 
-    expected_scores['threes'] = 3 
-    expected_scores['fours'] = 4 
-    expected_scores['fives'] = 5 
-    expected_scores['sixes'] = 6 
+    expected_scores['twos'] = 2
+    expected_scores['threes'] = 3
+    expected_scores['fours'] = 4
+    expected_scores['fives'] = 5
+    expected_scores['sixes'] = 6
     expected_scores['large_straight'] = np.sum(roll)
     test_scoring(roll, expected_scores)
 
@@ -136,13 +136,13 @@ def test_scoring(roll, expected_scores):
         print "Testing scoring of %s" % cat.name
         print "Roll : %s" % str(roll)
         if not cat.filled:
-            print "Not filled" 
+            print "Not filled"
             assert False
         if cat.score != expected_scores[cat.name]:
             print "Wrong score expected %i but got %i" % (expected_scores[cat.name], cat.score)
             assert False
-    
-    
+
+
 if __name__ == "__main__":
     test_create_scorecard()
     test_all_scoring()
