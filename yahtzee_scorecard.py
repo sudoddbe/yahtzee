@@ -73,10 +73,9 @@ class Scorecard:
         return self.score_n_of_a_kind(rolls, n = 4)
     
     def score_n_of_a_kind(self, rolls, n):
-        last_roll = 7
         rolls_in_a_row = 0
         bins = np.bincount(rolls)
-        last_roll = len(bins)
+        last_roll = len(bins)-1
         for bin in bins[::-1]:
             if bin >= n:
                 return last_roll*n
@@ -85,8 +84,11 @@ class Scorecard:
 
     def score_full_house(self, rolls):
         bins = np.bincount(rolls)
-        if len(bins > 0) == 2:
-            assert(len(bins == 2) == 1 and len(bins ==3) == 1)
+        if np.sum(bins > 0) == 2:
+            if (np.sum(bins == 2) == 1 and np.sum(bins ==3) == 1):
+                return np.inner(bins, np.arange(len(bins)))
+        elif np.sum(bins > 0) == 1:
+            assert(np.sum(bins == 5) == 1)
             return np.inner(bins, np.arange(len(bins)))
         return 0
 
