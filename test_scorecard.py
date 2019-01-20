@@ -1,4 +1,3 @@
-from yahtzee_probability import dice_probability_dict
 from yahtzee_scorecard import Scorecard
 import numpy as np
 
@@ -141,8 +140,26 @@ def test_scoring(roll, expected_scores):
         if cat.score != expected_scores[cat.name]:
             print "Wrong score expected %i but got %i" % (expected_scores[cat.name], cat.score)
             assert False
+    scorecard = Scorecard()
+    score_dict = scorecard.score_all_categories(roll)
+    for name,score in score_dict.iteritems():
+        if score != expected_scores[name]:
+            print "Wrong score expected %i but got %i" % (expected_scores[name], score)
+            assert False
+#Todo : Needs further testing
+def test_key_generation():
+    keys = Scorecard.generate_keys_for_turn(turn= 0)
+    assert(keys[0] == 0)
+    assert(len(keys) == 1)
+    keys = Scorecard.generate_keys_for_turn(turn= 1)
+    assert(len(keys) == 13)
+    keys = Scorecard.generate_keys_for_turn(turn= 13)
+    assert(len(keys) == 1)
+    keys = Scorecard.generate_keys_for_turn(turn= 12)
+    assert(len(keys) == 13)
 
-
+    keys
 if __name__ == "__main__":
     test_create_scorecard()
     test_all_scoring()
+    test_key_generation()

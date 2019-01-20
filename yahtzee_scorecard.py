@@ -1,5 +1,6 @@
 from yahtzee_probability import dice_probability_dict
 import numpy as np
+import itertools
 
 class Scorecard:
 
@@ -108,12 +109,33 @@ class Scorecard:
             return 50
         return 0
 
+    def score_all_categories(self, rolls):
+        return {cat.name:cat.score_roll_check(rolls) for cat in self.categories}
+
+    @classmethod
+    def generate_keys_for_turn(cls,turn):
+        nbr_categories = 13
+        if turn > nbr_categories:
+            print "invalid turn"
+            assert(False)
+        def ones_in_binary(num):
+            a = np.binary_repr(num, width = nbr_categories)
+            a = map(int, list(a))
+            return np.sum(a)
+        return [i for i in range(2**nbr_categories) if ones_in_binary(i) == turn]
+
+
 class Category():
     def __init__(self, name, scoring_function):
         self.name = name
         self.scoring_function = scoring_function
         self.filled = False
         self.score = 0
+
+    def score_roll_check(self, rolls):
+        if self.filled:
+            return -1
+        return self.score_roll(rolls)
 
     def score_roll(self, rolls):
         return self.scoring_function(rolls)
