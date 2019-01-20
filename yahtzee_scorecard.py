@@ -112,9 +112,8 @@ class Scorecard:
     def score_all_categories(self, rolls):
         return {cat.name:cat.score_roll_check(rolls) for cat in self.categories}
 
-    @classmethod
-    def generate_keys_for_turn(cls,turn):
-        nbr_categories = 13
+    def generate_keys_for_turn(self ,turn):
+        nbr_categories = len(self.categories)
         if turn > nbr_categories:
             print "invalid turn"
             assert(False)

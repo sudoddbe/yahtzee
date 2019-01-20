@@ -148,14 +148,15 @@ def test_scoring(roll, expected_scores):
             assert False
 #Todo : Needs further testing
 def test_key_generation():
-    keys = Scorecard.generate_keys_for_turn(turn= 0)
+    scorecard = Scorecard()
+    keys = scorecard.generate_keys_for_turn(turn= 0)
     assert(keys[0] == 0)
     assert(len(keys) == 1)
-    keys = Scorecard.generate_keys_for_turn(turn= 1)
+    keys = scorecard.generate_keys_for_turn(turn= 1)
     assert(len(keys) == 13)
-    keys = Scorecard.generate_keys_for_turn(turn= 13)
+    keys = scorecard.generate_keys_for_turn(turn= 13)
     assert(len(keys) == 1)
-    keys = Scorecard.generate_keys_for_turn(turn= 12)
+    keys = scorecard.generate_keys_for_turn(turn= 12)
     assert(len(keys) == 13)
 
     keys
