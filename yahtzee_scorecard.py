@@ -123,6 +123,16 @@ class Scorecard:
             return np.sum(a)
         return [i for i in range(2**nbr_categories) if ones_in_binary(i) == turn]
 
+    @classmethod
+    def get_scorecard_from_key(cls, key):
+        nbr_categories = 13
+        a = np.binary_repr(key, width = nbr_categories)
+        a = map(int, list(a))
+        scorecard = Scorecard()
+        for i, category in zip(a, scorecard.categories):
+            if i > 0:
+                category.fill(0)
+        return scorecard
 
 class Category():
     def __init__(self, name, scoring_function):
