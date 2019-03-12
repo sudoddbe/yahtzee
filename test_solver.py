@@ -20,6 +20,11 @@ def test_select_category():
     c = s.select_category_greedy(rolls = (1,2,3,4,5))
     assert(c == 'small_straight')
 
+def test_fill_game_map_greedily():
+    s = Solver()
+    s.fill_game_map_greedily()
+
 if __name__ == "__main__":
     test_create()
     test_select_category()
+    test_fill_game_map_greedily()
