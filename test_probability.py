@@ -22,6 +22,8 @@ if __name__ == "__main__":
     input_sets = [p for n in range(6) for p in itertools.combinations_with_replacement(dice_values, n)]
     output_sets = [p for p in itertools.combinations_with_replacement(dice_values, 5)]
     fpd, rpd = dice_probability_dict(input_sets, output_sets)
+    print len(fpd.keys())
+    print len(rpd.keys())
     test_forward_and_backwards_probabilities(fpd,rpd)
 
     input_sets = [(), (1, 2, 3, 4), (1, 2, 3), (1, 2, 3), (1, 1, 1)]
