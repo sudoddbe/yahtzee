@@ -37,4 +37,14 @@ class Solver:
             game_map[turn] = key_dict
         return game_map
 
+    def fill_game_map_greedily(self):
+        game_map = self.game_map
+        for turn, card in game_map.iteritems():
+            key_dict = game_map[turn]
+            for key, output_dict in key_dict.iteritems():
+                scorecard = Scorecard.get_scorecard_from_key(key)
+                for rolls in output_dict:
+                    score_dict = scorecard.score_all_categories(rolls)
+                    i = np.argmax(score_dict.values())
+                    output_dict[rolls] = score_dict.keys()[i]
 
