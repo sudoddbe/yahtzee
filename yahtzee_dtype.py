@@ -43,12 +43,12 @@ d = {'names' : (
             'nbr_roll',
             'current_roll', 
             'scorecard',
-            'scorecard_int'),
+            'scorecard_byte'),
     'formats' : (
             'B',
             '5B',
             scorecard_dtype, 
-            'u2'),
+            '13b'),
     'offsets' : (
             0,
             1,
