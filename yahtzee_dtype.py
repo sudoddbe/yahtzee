@@ -1,7 +1,7 @@
 import numpy as np
 
 NBR_SUBTURNS = 4
-MAX_UPPER_SCORE = 2 
+MAX_UPPER_SCORE = 1 
 NBR_CATEGORIES = 13
 NBR_TURNS = 13
 

@@ -1,3 +1,4 @@
+from yahtzee_dtype import NBR_CATEGORIES
 from yahtzee_probability import dice_probability_dict
 import numpy as np
 import itertools
@@ -89,5 +90,5 @@ scoring_functions = [
 ]
 scoring_dict = dict(zip(keys, scoring_functions))
 def score_category(category_int, rolls):
-    return scoring_dict[category_int](rolls) 
+    return (scoring_dict[category_int](rolls),0)
     
