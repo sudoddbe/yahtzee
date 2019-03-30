@@ -1,58 +1,8 @@
-from yahtzee_dtype import game_state_dtype, scorecard_dtype, NBR_ROLLS, MAX_SCORE_UPPER
+from yahtzee_dtype import yahtzee_dtype, scorecard_dtype, NBR_SUBTURNS, MAX_UPPER_SCORE, NBR_CATEGORIES, NBR_TURNS
 from yahtzee_probability import dice_probability_dict
+from yahtzee_scoring_functions import score_category
 import numpy as np
 import multiprocessing
-
-latest_index = 0
-def get_forward_neighbours_roll_to_roll(map_entry, game_map, turn):
-    global latest_index
-    forward = game_map[turn+1]
-    #assert(map_entry["nbr_roll"] < 2)
-    for i,state in enumerate(forward[latest_index:, 0]):
-        if np.all(map_entry["scorecard"] == state["scorecard"]):
-            latest_index = latest_index + i
-            print latest_index
-            print "i",i
-            return forward[latest_index, :]
-
-def get_forward_neighbours_roll_to_select(map_entry, game_map, turn):
-    forward = game_map[turn+1]
-    #assert(False)
-    assert(map_entry["nbr_roll"] == 2)
-
-    for j,state in enumerate(forward[0, :]):
-        if np.all(map_entry["current_roll"] == state["current_roll"]):
-            break
-
-    scorecard_index = []
-    for i,state in enumerate(forward[:, j]):
-        scorecard_diff = state["scorecard_byte"] - map_entry["scorecard_byte"]
-        if np.any(scorecard_diff < 0):
-                continue;
-        if np.sum(scorecard_diff) == 1:
-            scorecard_index.append(i)
-    return forward[scorecard_index, j]
-
-def get_forward_neighbours_select_to_roll(map_entry, game_map, turn):
-    global latest_index
-    forward = game_map[turn+1]
-    assert(map_entry["nbr_roll"] == 3)
-    for i,state in enumerate(forward[latest_index:, 0]):
-        if (map_entry["scorecard"] == state["scorecard"]):
-            latest_index = latest_index + i
-            print latest_index
-            print i
-            return forward[latest_index, :]
-
-def get_forward_neighbours(map_entry, game_map, turn):
-    if map_entry["nbr_roll"] < 2:
-        return get_forward_neighbours_roll_to_roll(map_entry, game_map, turn)
-
-    if map_entry["nbr_roll"] ==  2:
-        return get_forward_neighbours_roll_to_select(map_entry, game_map, turn)
-
-    if map_entry["nbr_roll"] ==  3:
-        return get_forward_neighbours_select_to_roll(map_entry, game_map, turn)
 
 def generate_keys_for_turn(categories, turn):
     nbr_categories = len(categories)
@@ -65,39 +15,59 @@ def generate_keys_for_turn(categories, turn):
         return np.sum(a)
     return [i for i in range(2**nbr_categories) if ones_in_binary(i) == turn]
 
-def set_map_entry(out_queue, turn, nbr_roll, reverse_probability_dict):
-    keys = generate_keys_for_turn(scorecard_dtype.names, turn)
-    map_entry = np.zeros((len(keys), len(reverse_probability_dict.keys()), MAX_SCORE_UPPER), dtype=game_state_dtype)
-    for i, key in enumerate(keys):
-        for j, current_rolls in enumerate(reverse_probability_dict.keys()):
-            for k in range(MAX_SCORE_UPPER):
-                map_entry[i,j,k]["nbr_roll"] = nbr_roll
-                map_entry[i,j,k]["current_roll"] = np.array(current_rolls, dtype="B")
-                map_entry[i,j,k]["upper_score"] = k
-                binary = np.binary_repr(key)
-                binary = map(int, list(binary))
-                for c, v in zip(scorecard_dtype.names, binary):
-                    map_entry[i,j,k]["scorecard"][c] = v
-    out_queue.put((turn, nbr_roll, map_entry))
-    print 3*turn + nbr_roll
+def find_forward_categories(key):
+    pow_2 = 2**np.arange(NBR_CATEGORIES)[::-1]
+    a = np.binary_repr(key, width = NBR_CATEGORIES)
+    a = map(int, list(a))
+    keys = []
+    for i,e in enumerate(a):
+        if e == 0:
+            copy = np.array([element for element in a])
+            copy[i] = 1
+            key = np.dot(pow_2, copy)
+            keys += [int(key)] 
+    return keys 
 
+#End state is one unfilled category with a given roll and upper score. No choices to be made...
+def fill_end_states(last_frame, reverse_probability_dicti, scorecard_dict):
+    subturn = 3
+    for  upper_score in range(UPPER_MAX_SCORE):
+        for k, roll in reverse_probability_dict.keys():
+            for l, scorecard in scorecard_dict.keys():
+                score, added_upper_score = score_category(np.bitwise_not(scorecard), roll)                
+                if upper_score + added_upper_score > MAX_SCORE_UPPER -1 :
+                    score += 50
+                last_frame[subturn, upper_score, k, l]["score"] = score
+
+def fill_last_subturn(game_map, forward_game_frame):
+    subturn = 3
+    for  upper_score in range(UPPER_MAX_SCORE):
+        for k, roll in reverse_probability_dict.keys():
+            for l, scorecard in scorecard_dict.keys():
+                score, added_upper_score = score_category(np.bitwise_not(scorecard), roll)                
+                if upper_score + added_upper_score > MAX_SCORE_UPPER -1 :
+                    score += 50
+                last_frame[subturn, upper_score, k, l]["score"] = score
+def fill_turn(game_map, turn):
+    game_frame = game_map[turn]
+    forward_game_frame = game_map[turn+1]
+    fill_last_subturn(game_frame, forward_game_frame)
+    for subturn in range(NBR_SUBTURNS-1)[::-1]:
+        fill_roll_subturn(game_frame)
+    
 #Game map has one entry for every round
 #i.e three per category
 def generate_game_map():
-    game_map = [ None for turn in range((NBR_ROLLS +1)*(len(scorecard_dtype.names)))]
     _, reverse_probability_dict = dice_probability_dict()
-    p_list = []
-    out_queue = multiprocessing.Queue()
-    for turn in range(len(scorecard_dtype.names)):
-        for nbr_roll in range(NBR_ROLLS + 1):
-            p_list.append(multiprocessing.Process(target = set_map_entry, args = (out_queue, turn, nbr_roll, reverse_probability_dict,)))
-    for p in p_list:
-        p.start()
-
-    for p in p_list:
-        (turn, nbr_roll, map_entry) = out_queue.get()
-        game_map[4*turn + nbr_roll] = map_entry
-    return game_map
+    category_index = [{ key, i for key, i in enumerate(generate_keys_for_turn(scorecard_dtype.names, turn))} for turn in range(NBR_TURNS)]
+    nbr_unique_rolls = len(reverse_probability_dict.keys())
+    game_map = [None for turn in range(NBR_TURNS)]]
+    for turn in range(NBR_TURNS):
+        nbr_scorecards = len(category_index[turn].keys())
+        game_map[turn] = np.zeros((NBR_SUBTURNS, UPPER_MAX_SCORE, nbr_unique_rolls, nbr_scorebards) dtype = "yahtzee_dtype")
+    fill_end_states(game_map[-1], reverse_probability_dict, category_index[-1])
+    for turn in range(NBR_TURNS-1)[::-1]:
+        fill_turn(game_map, turn)
 
 if __name__ == "__main__":
     game_map = generate_game_map()
@@ -115,8 +85,9 @@ if __name__ == "__main__":
         i = 0
         global latest_index 
         latest_index = 0
-        for map_entry_rows in game_map[turn]:
-            for map_entry in map_entry_rows:
-                print turn, i, latest_index
-                i += 1
-                get_forward_neighbours(map_entry, game_map, turn)
+        for map_entry_frames in game_map[turn]:
+            for map_entry_rows in map_entry_frames:
+                for map_entry in map_entry_rows:
+                    print turn, i, latest_index
+                    i += 1
+                    get_forward_neighbours(map_entry, game_map, turn)

@@ -1,7 +1,10 @@
 import numpy as np
 
-NBR_ROLLS = 3
-MAX_SCORE_UPPER = 63
+NBR_SUBTURNS = 4
+MAX_UPPER_SCORE = 2 
+NBR_CATEGORIES = 13
+NBR_TURNS = 13
+
 
 #An attempt using dtype to save some memory in gamestate representation
 #Currently the smallest basic type is bytes (i.e booleans are NOT bit-represented
@@ -40,28 +43,40 @@ d_scorecard = {
 scorecard_dtype = np.dtype(d_scorecard)
 d = {'names' : (
             'nbr_roll',
-            'current_roll', 
+            'roll_index', 
             'upper_score',
-            'expected_value',
             'scorecard',
-            'scorecard_byte'),
+            'expected_value',
+            ),
     'formats' : (
             'B',
-            '5B',
             'B',
-            'f4',
-            scorecard_dtype, 
-            '13b'),
+            'B',
+            'u2', 
+            'f2',
+            ),
     'offsets' : (
             0,
             1,
-            6,
-            7,
-            11,
-            11),
-    'itemsize' : 24 
+            2,
+            3,
+            5),
+    'itemsize' : 7 
     }
 game_state_dtype = np.dtype(d)
+d = {'names' : (
+            'score',
+            'action', 
+            ),
+    'formats' : (
+            'f2',
+            'B'),
+    'offsets' : (
+            0,
+            2),
+    'itemsize' : 3 
+    }
+yahtzee_dtype = np.dtype(d)
 #Current size of game stat is 19 bytes. Might select 24 or 32 for performance reasons. 
 #Estimation of size of all gamestates is:
 #(combinations of 5 dices) * (nbr_rerolls) * (number of scorecards) * (size of single gamestate)
