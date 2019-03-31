@@ -114,6 +114,7 @@ if __name__ == "__main__":
     print "stop",stop
     print "start",start
     print "diff",diff
+    forward_probability_dict, reverse_probability_dict = dice_probability_dict()
     tmp_probability = np.array(forward_probability_dict[input_set].values())
     tmp_scores = game_map[0][0, 0 ]
     tmp_scores = game_map[0][0, 0, :, 0]['score']
@@ -123,7 +124,6 @@ if __name__ == "__main__":
     print "second",game_map[1]
     print "second to last", game_map[-2]
     print "last",game_map[-1]
-    _, reverse_probability_dict = dice_probability_dict()
     print reverse_probability_dict.keys() 
     
     print len(game_map)
