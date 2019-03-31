@@ -99,7 +99,7 @@ def generate_game_map():
     for turn in range(NBR_TURNS):
         nbr_scorecards = len(category_index[turn].keys())
         game_map[turn] = np.zeros((NBR_SUBTURNS, MAX_UPPER_SCORE, nbr_unique_rolls, nbr_scorecards), dtype = yahtzee_dtype)
-    fill_end_states(game_map[-1], reverse_probability_dict, forward_probability_dicti, category_index[-1])
+    fill_end_states(game_map[-1], reverse_probability_dict, forward_probability_dict, category_index[-1])
     for turn in range(NBR_TURNS-1)[::-1]:
         print "turn",turn
         fill_turn(game_map, turn, reverse_probability_dict, forward_probability_dict, category_index[turn], category_index[turn+1])
