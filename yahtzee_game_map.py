@@ -29,7 +29,7 @@ def find_forward_categories(key):
     return keys 
 
 #End state is one unfilled category with a given roll and upper score. No choices to be made...
-def fill_end_states(last_frame, reverse_probability_dict, scorecard_dict):
+def fill_end_states(last_frame, reverse_probability_dict, forward_probability_dict, scorecard_dict):
     subturn = 3
     for  upper_score in range(MAX_UPPER_SCORE):
         for k, roll in enumerate(reverse_probability_dict.keys()):
@@ -38,6 +38,10 @@ def fill_end_states(last_frame, reverse_probability_dict, scorecard_dict):
                 if upper_score + added_upper_score > MAX_UPPER_SCORE -1 :
                     score += 50
                 last_frame[subturn, upper_score, k, l]["score"] = score
+
+    for subturn in range(NBR_SUBTURNS-1)[::-1]:
+        print subturn
+        fill_roll_subturn(last_frame, subturn, reverse_probability_dict, forward_probability_dict, scorecard_dict)
 
 def fill_last_subturn(game_frame, forward_game_frame, reverse_probability_dict, forward_probability_dict, scorecard_dict, forward_scorecard_dict):
     subturn = 3
