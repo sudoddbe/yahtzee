@@ -41,6 +41,7 @@ def fill_end_states(last_frame, reverse_probability_dict, scorecard_dict):
 
 def fill_last_subturn(game_frame, forward_game_frame, reverse_probability_dict, forward_probability_dict, scorecard_dict, forward_scorecard_dict):
     subturn = 3
+    tmp_probability = np.array(forward_probability_dict[tuple()].values())
     for  upper_score in range(MAX_UPPER_SCORE):
         for k, roll in enumerate(reverse_probability_dict.keys()):
             for l, scorecard in enumerate(scorecard_dict.keys()):
@@ -51,7 +52,6 @@ def fill_last_subturn(game_frame, forward_game_frame, reverse_probability_dict, 
                     tmp_upper_score = upper_score + added_upper_score
                     tmp_upper_score = min(tmp_upper_score, MAX_UPPER_SCORE-1)
                     tmp_fwd_scores = forward_game_frame[0, tmp_upper_score, :, forward_scorecard_dict[fc]]['score']
-                    tmp_probability = np.array(forward_probability_dict[tuple()].values())
                     expected_value = np.dot(tmp_probability, tmp_fwd_scores)
                     expected_value += score
                     if expected_value > max_expected_value:
