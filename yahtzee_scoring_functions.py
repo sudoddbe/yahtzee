@@ -90,5 +90,10 @@ scoring_functions = [
 ]
 scoring_dict = dict(zip(keys, scoring_functions))
 def score_category(category_int, rolls):
-    return (scoring_dict[category_int](rolls),0)
+    if category_int < 2**5 +1:
+        score = scoring_dict[category_int](rolls)
+        return (score, score)
+    else:
+        score = scoring_dict[category_int](rolls)
+        return (score, 0)
     
