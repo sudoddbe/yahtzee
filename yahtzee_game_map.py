@@ -103,9 +103,22 @@ def generate_game_map():
     for turn in range(NBR_TURNS-1)[::-1]:
         print "turn",turn
         fill_turn(game_map, turn, reverse_probability_dict, forward_probability_dict, category_index[turn], category_index[turn+1])
+    return game_map
 
 if __name__ == "__main__":
+    import time
+    start = time.time()
     game_map = generate_game_map()
+    stop = time.time()
+    diff = stop - start
+    print "stop",stop
+    print "start",start
+    print "diff",diff
+    tmp_probability = np.array(forward_probability_dict[input_set].values())
+    tmp_scores = game_map[0][0, 0 ]
+    tmp_scores = game_map[0][0, 0, :, 0]['score']
+    expected_value = np.dot(tmp_probability, tmp_fwd_scores)
+    print expected_value
     print "first", game_map[0]
     print "second",game_map[1]
     print "second to last", game_map[-2]
@@ -114,15 +127,3 @@ if __name__ == "__main__":
     print reverse_probability_dict.keys() 
     
     print len(game_map)
-    for t in range(len(game_map) -2):
-        turn = t+1
-        print turn
-        i = 0
-        global latest_index 
-        latest_index = 0
-        for map_entry_frames in game_map[turn]:
-            for map_entry_rows in map_entry_frames:
-                for map_entry in map_entry_rows:
-                    print turn, i, latest_index
-                    i += 1
-                    get_forward_neighbours(map_entry, game_map, turn)
