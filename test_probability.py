@@ -1,13 +1,14 @@
 from yahtzee_probability import dice_probability_dict
 import itertools
-
+import numpy as np
 def test_forward_and_backwards_probabilities(fpd, rpd):
     for input_set, result in fpd.iteritems():
         for output_set, probability in result.iteritems():
             assert fpd[input_set][output_set] == rpd[output_set][input_set]
             assert probability >= 0
             assert probability <= 1
-
+    for input_set, result in fpd.iteritems():
+        assert abs(np.sum(result.values()) -1) < 0.0001
 #check results with pen and paper calculations...
 #Might be redundant as this understanding is the input to the probability
 #calculations
