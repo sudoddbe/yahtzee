@@ -30,7 +30,7 @@ def find_forward_categories(key):
 
 #End state is one unfilled category with a given roll and upper score. No choices to be made...
 def fill_end_states(last_frame, reverse_probability_dict, forward_probability_dict, scorecard_dict):
-    subturn = 3
+    subturn = NBR_SUBTURNS-1
     for  upper_score in range(MAX_UPPER_SCORE):
         for k, roll in enumerate(reverse_probability_dict.keys()):
             for l, scorecard in enumerate(scorecard_dict.keys()):
@@ -44,7 +44,7 @@ def fill_end_states(last_frame, reverse_probability_dict, forward_probability_di
         fill_roll_subturn(last_frame, subturn, reverse_probability_dict, forward_probability_dict, scorecard_dict)
 
 def fill_last_subturn(game_frame, forward_game_frame, reverse_probability_dict, forward_probability_dict, scorecard_dict, forward_scorecard_dict):
-    subturn = 3
+    subturn = NBR_SUBTURNS -1
     tmp_probability = np.array(forward_probability_dict[tuple()].values())
     for  upper_score in range(MAX_UPPER_SCORE):
         for k, roll in enumerate(reverse_probability_dict.keys()):
@@ -115,10 +115,10 @@ if __name__ == "__main__":
     print "start",start
     print "diff",diff
     forward_probability_dict, reverse_probability_dict = dice_probability_dict()
-    tmp_probability = np.array(forward_probability_dict[input_set].values())
+    tmp_probability = np.array(forward_probability_dict[tuple()].values())
     tmp_scores = game_map[0][0, 0 ]
     tmp_scores = game_map[0][0, 0, :, 0]['score']
-    expected_value = np.dot(tmp_probability, tmp_fwd_scores)
+    expected_value = np.dot(tmp_probability, tmp_scores)
     print expected_value
     print "first", game_map[0]
     print "second",game_map[1]
