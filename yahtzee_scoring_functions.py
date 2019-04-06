@@ -46,14 +46,28 @@ def score_three_of_a_kind(rolls):
 def score_four_of_a_kind(rolls):
     return score_n_of_a_kind(rolls, n = 4)
 
+def score_two_pair(rolls):
+    bins = np.bincount(rolls)
+    last_roll = len(bins) -1
+    score = 0
+    done = 0
+    for bin in bins[::-1]:
+        if bin == 2 or bin ==3:
+            score += 2*last_roll
+            done += 1
+            if done == 2:
+                return score
+        last_roll -= 1
+    return 0
+
 def score_full_house(rolls):
     bins = np.bincount(rolls)
     if np.sum(bins > 0) == 2:
         if (np.sum(bins == 2) == 1 and np.sum(bins ==3) == 1):
             return np.inner(bins, np.arange(len(bins)))
-    elif np.sum(bins > 0) == 1:
-        assert(np.sum(bins == 5) == 1)
-        return np.inner(bins, np.arange(len(bins)))
+    #elif np.sum(bins > 0) == 1:
+        #assert(np.sum(bins == 5) == 1)
+        #return np.inner(bins, np.arange(len(bins)))
     return 0
 
 def score_small_straight(rolls):
@@ -65,6 +79,9 @@ def score_large_straight(rolls):
     if rolls == (2,3,4,5,6):
         return  2+ 3+ 4+ 5 +6
     return 0
+
+def score_chance(rolls):
+    return np.sum(rolls)
 
 def score_yahtzee(rolls):
     bins = np.bincount(rolls)
@@ -83,9 +100,11 @@ scoring_functions = [
     score_two_of_a_kind,
     score_three_of_a_kind,
     score_four_of_a_kind,
+    score_two_pair,
     score_full_house,
     score_small_straight,
     score_large_straight,
+    score_chance,
     score_yahtzee,
 ]
 scoring_dict = dict(zip(keys, scoring_functions))
