@@ -35,7 +35,7 @@ def fill_end_states(last_frame, reverse_probability_dict, forward_probability_di
         for k, roll in enumerate(reverse_probability_dict.keys()):
             for l, scorecard in enumerate(scorecard_dict.keys()):
                 score, added_upper_score = score_category(2**NBR_CATEGORIES -1 - scorecard , roll)                
-                if upper_score + added_upper_score > MAX_UPPER_SCORE -1 :
+                if upper_score + added_upper_score >= MAX_UPPER_SCORE -1 :
                     score += 50
                 last_frame[subturn, upper_score, k, l]["score"] = score
 
