@@ -76,12 +76,6 @@ def fill_roll_subturn(game_frame, subturn, reverse_probability_dict, forward_pro
             for l, scorecard in enumerate(scorecard_dict.keys()):
                 max_expected_value = 0
                 tmp_fwd_scores = game_frame[subturn+1, upper_score, :, scorecard_dict[scorecard]]['score']
-                #for input_set in forward_probability_dict.keys():
-                #    tmp_probability = np.array(forward_probability_dict[input_set].values())
-                #    expected_value = np.dot(tmp_probability, tmp_fwd_scores)
-                #    print input_set
-                #    if expected_value > max_expected_value:
-                #        max_expected_value = expected_value
                 max_expected_value = np.max(tmp_prob_matrix * tmp_fwd_scores)
                 game_frame[subturn, upper_score, k, l]["score"] = max_expected_value
 
