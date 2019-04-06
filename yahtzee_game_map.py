@@ -4,8 +4,8 @@ from yahtzee_scoring_functions import score_category
 import numpy as np
 import multiprocessing
 
-def generate_keys_for_turn(categories, turn):
-    nbr_categories = len(categories)
+def generate_keys_for_turn(turn):
+    nbr_categories = NBR_CATEGORIES
     if turn > nbr_categories:
         print "invalid turn"
         assert(False)
@@ -92,7 +92,7 @@ def fill_turn(game_map, turn, reverse_probability_dict, forward_probability_dict
 #i.e three per category
 def generate_game_map():
     forward_probability_dict, reverse_probability_dict = dice_probability_dict()
-    category_index = [{ key: i for  i, key in enumerate(generate_keys_for_turn(scorecard_dtype.names, turn))} for turn in range(NBR_TURNS)]
+    category_index = [{ key: i for  i, key in enumerate(generate_keys_for_turn(turn))} for turn in range(NBR_TURNS)]
     print category_index[-1]
     nbr_unique_rolls = len(reverse_probability_dict.keys())
     game_map = [None for turn in range(NBR_TURNS)]
