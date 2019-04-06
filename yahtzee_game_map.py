@@ -42,7 +42,7 @@ def fill_end_states(last_frame, reverse_probability_dict, forward_probability_di
 
     for subturn in range(NBR_SUBTURNS-1)[::-1]:
         fill_roll_subturn(last_frame, subturn, reverse_probability_dict, forward_probability_dict, scorecard_dict)
-def scorecard_max_expected_value(fc, upper_score, roll, scorecard, forward_game_frame, forward_scorecard_dict, tmp_probability):
+def scorecard_max_expected_value(scorecard, upper_score, roll,forward_game_frame, forward_scorecard_dict, tmp_probability):
     max_expected_value = 0
     fwd_cat = find_forward_categories(scorecard)
     for fc in fwd_cat:
