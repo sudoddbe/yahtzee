@@ -40,7 +40,6 @@ def fill_end_states(last_frame, reverse_probability_dict, forward_probability_di
                 last_frame[subturn, upper_score, k, l]["score"] = score
 
     for subturn in range(NBR_SUBTURNS-1)[::-1]:
-        print subturn
         fill_roll_subturn(last_frame, subturn, reverse_probability_dict, forward_probability_dict, scorecard_dict)
 
 def fill_last_subturn(game_frame, forward_game_frame, reverse_probability_dict, forward_probability_dict, scorecard_dict, forward_scorecard_dict):
@@ -84,10 +83,8 @@ def fill_roll_subturn(game_frame, subturn, reverse_probability_dict, forward_pro
 def fill_turn(game_map, turn, reverse_probability_dict, forward_probability_dict, scorecard_dict, forward_scorecard_dict):
     game_frame = game_map[turn]
     forward_game_frame = game_map[turn+1]
-    print 3
     fill_last_subturn(game_frame, forward_game_frame, reverse_probability_dict, forward_probability_dict, scorecard_dict,forward_scorecard_dict)
     for subturn in range(NBR_SUBTURNS-1)[::-1]:
-        print subturn
         fill_roll_subturn(game_frame, subturn, reverse_probability_dict, forward_probability_dict, scorecard_dict)
     
 #Game map has one entry for every round
@@ -95,7 +92,6 @@ def fill_turn(game_map, turn, reverse_probability_dict, forward_probability_dict
 def generate_game_map():
     forward_probability_dict, reverse_probability_dict = dice_probability_dict()
     category_index = [{ key: i for  i, key in enumerate(generate_keys_for_turn(turn))} for turn in range(NBR_TURNS)]
-    print category_index[-1]
     nbr_unique_rolls = len(reverse_probability_dict.keys())
     game_map = [None for turn in range(NBR_TURNS)]
     for turn in range(NBR_TURNS):
@@ -103,7 +99,6 @@ def generate_game_map():
         game_map[turn] = np.zeros((NBR_SUBTURNS, MAX_UPPER_SCORE, nbr_unique_rolls, nbr_scorecards), dtype = yahtzee_dtype)
     fill_end_states(game_map[-1], reverse_probability_dict, forward_probability_dict, category_index[-1])
     for turn in range(NBR_TURNS-1)[::-1]:
-        print "turn",turn
         fill_turn(game_map, turn, reverse_probability_dict, forward_probability_dict, category_index[turn], category_index[turn+1])
     return game_map
 
@@ -122,10 +117,3 @@ if __name__ == "__main__":
     tmp_scores = game_map[0][0, 0, :, 0]['score']
     expected_value = np.dot(tmp_probability, tmp_scores)
     print expected_value
-    print "first", game_map[0]
-    print "second",game_map[1]
-    print "second to last", game_map[-2]
-    print "last",game_map[-1]
-    print reverse_probability_dict.keys() 
-    
-    print len(game_map)
