@@ -2,8 +2,8 @@ import numpy as np
 
 NBR_SUBTURNS = 3
 MAX_UPPER_SCORE = 1 
-NBR_CATEGORIES = 13
-NBR_TURNS = 13
+NBR_CATEGORIES = 15
+NBR_TURNS = 15
 
 
 #An attempt using dtype to save some memory in gamestate representation
