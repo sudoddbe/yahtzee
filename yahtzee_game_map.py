@@ -38,7 +38,7 @@ def fill_end_states(last_frame, reverse_probability_dict, forward_probability_di
                 score, added_upper_score = score_category(2**NBR_CATEGORIES -1 - scorecard , roll)                
                 if upper_score + added_upper_score >= MAX_UPPER_SCORE -1 :
                     score += 50
-                last_frame[subturn, upper_score, k, l]["score"] = score
+                last_frame[subturn, upper_score, k, scorecard_dict[scorecard]]["score"] = score
 
     for subturn in range(NBR_SUBTURNS-1)[::-1]:
         fill_roll_subturn(last_frame, subturn, reverse_probability_dict, forward_probability_dict, scorecard_dict)
@@ -62,26 +62,34 @@ def scorecard_max_expected_value(roll, upper_score, scorecards,forward_game_fram
 
 
 def fill_last_subturn(game_frame, forward_game_frame, reverse_probability_dict, forward_probability_dict, scorecard_dict, forward_scorecard_dict):
-    pool = multiprocessing.Pool()
+    MULTI = 1
+    if MULTI:
+        pool = multiprocessing.Pool()
     subturn = NBR_SUBTURNS -1
     tmp_probability = np.array(forward_probability_dict[tuple()].values())
     for  upper_score in range(MAX_UPPER_SCORE):
-        max_expected_values = pool.map(partial(scorecard_max_expected_value, upper_score = upper_score, scorecards = scorecard_dict.keys(), forward_game_frame=forward_game_frame, forward_scorecard_dict=forward_scorecard_dict,tmp_probability=tmp_probability), reverse_probability_dict.keys())
+        if MULTI:
+            max_expected_values = pool.map(partial(scorecard_max_expected_value, upper_score = upper_score, scorecards = scorecard_dict.keys(), forward_game_frame=forward_game_frame, forward_scorecard_dict=forward_scorecard_dict,tmp_probability=tmp_probability), reverse_probability_dict.keys())
         for k, roll in enumerate(reverse_probability_dict.keys()):
             for l, scorecard in enumerate(scorecard_dict.keys()):
-                game_frame[subturn, upper_score, k, l]["score"] = max_expected_values[k][l]
+                if MULTI:
+                    game_frame[subturn, upper_score, k, scorecard_dict[scorecard]]["score"] = max_expected_values[k][l]
+                else:
+                    game_frame[subturn, upper_score, k, scorecard_dict[scorecard]]["score"] = scorecard_max_expected_value(roll, upper_score = upper_score, scorecards = [scorecard], forward_game_frame=forward_game_frame, forward_scorecard_dict=forward_scorecard_dict,tmp_probability=tmp_probability)[0]
 
+    if MULTI:
+        pool.close()
+        
 def fill_roll_subturn(game_frame, subturn, reverse_probability_dict, forward_probability_dict, scorecard_dict):
     prob_matrix = np.array([forward_probability_dict[input_set].values() for input_set in forward_probability_dict.keys()])
-    tmp_probability = np.array(forward_probability_dict[input_set].values())
     for  upper_score in range(MAX_UPPER_SCORE):
         for k, roll in enumerate(reverse_probability_dict.keys()):
             index = np.array(reverse_probability_dict[roll].values()) > 0
             tmp_prob_matrix = prob_matrix[index,:]
             for l, scorecard in enumerate(scorecard_dict.keys()):
                 max_expected_value = 0
-                tmp_fwd_scores = game_frame[subturn+1, upper_score, :, scorecard_dict[scorecard]]['score']
-                max_expected_value = np.max(tmp_prob_matrix * tmp_fwd_scores)
+                tmp_fwd_scores = game_frame[subturn+1, upper_score, :, l]['score']
+                max_expected_value = np.max(np.dot(tmp_prob_matrix, tmp_fwd_scores))
                 game_frame[subturn, upper_score, k, l]["score"] = max_expected_value
 
 def fill_turn(game_map, turn, reverse_probability_dict, forward_probability_dict, scorecard_dict, forward_scorecard_dict):
@@ -89,10 +97,9 @@ def fill_turn(game_map, turn, reverse_probability_dict, forward_probability_dict
     forward_game_frame = game_map[turn+1]
     fill_last_subturn(game_frame, forward_game_frame, reverse_probability_dict, forward_probability_dict, scorecard_dict,forward_scorecard_dict)
     for subturn in range(NBR_SUBTURNS-1)[::-1]:
+        print turn, subturn
         fill_roll_subturn(game_frame, subturn, reverse_probability_dict, forward_probability_dict, scorecard_dict)
     
-#Game map has one entry for every round
-#i.e three per category
 def generate_game_map():
     forward_probability_dict, reverse_probability_dict = dice_probability_dict()
     category_index = [{ key: i for  i, key in enumerate(generate_keys_for_turn(turn))} for turn in range(NBR_TURNS)]
@@ -101,6 +108,7 @@ def generate_game_map():
     for turn in range(NBR_TURNS):
         nbr_scorecards = len(category_index[turn].keys())
         game_map[turn] = np.zeros((NBR_SUBTURNS, MAX_UPPER_SCORE, nbr_unique_rolls, nbr_scorecards), dtype = yahtzee_dtype)
+
     fill_end_states(game_map[-1], reverse_probability_dict, forward_probability_dict, category_index[-1])
     for turn in range(NBR_TURNS-1)[::-1]:
         fill_turn(game_map, turn, reverse_probability_dict, forward_probability_dict, category_index[turn], category_index[turn+1])
