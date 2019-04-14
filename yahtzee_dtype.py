@@ -66,15 +66,14 @@ d = {'names' : (
 game_state_dtype = np.dtype(d)
 d = {'names' : (
             'score',
-            'action', 
             ),
     'formats' : (
             'f2',
-            'B'),
+            ),
     'offsets' : (
             0,
-            2),
-    'itemsize' : 3 
+            ),
+    'itemsize' : 2 
     }
 yahtzee_dtype = np.dtype(d)
 #Current size of game stat is 19 bytes. Might select 24 or 32 for performance reasons. 
