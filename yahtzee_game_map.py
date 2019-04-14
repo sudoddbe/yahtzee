@@ -80,17 +80,33 @@ def fill_last_subturn(game_frame, forward_game_frame, reverse_probability_dict, 
     if MULTI:
         pool.close()
         
+def roll_max_expected_value(roll_k, game_frame, subturn, upper_score, reverse_probability_dict, scorecard_dict, prob_matrix):
+        #index = np.array(reverse_probability_dict[roll].values()) > 0
+        index = prob_matrix[:,roll_k] > 0
+        tmp_prob_matrix = prob_matrix[index,:]
+        max_expected_values = dict()
+        for scorecard, scorecard_index in scorecard_dict.iteritems():
+            max_expected_value = 0
+            tmp_fwd_scores = game_frame[subturn+1, upper_score, :, scorecard_index]['score']
+            max_expected_values[scorecard] = np.max(np.dot(tmp_prob_matrix, tmp_fwd_scores))
+        return max_expected_values
+
 def fill_roll_subturn(game_frame, subturn, reverse_probability_dict, forward_probability_dict, scorecard_dict):
+    MULTI = 1
+    if MULTI:
+        pool = multiprocessing.Pool()
     prob_matrix = np.array([forward_probability_dict[input_set].values() for input_set in forward_probability_dict.keys()])
     for  upper_score in range(MAX_UPPER_SCORE):
+        if MULTI:
+            max_expected_values = pool.map(partial(roll_max_expected_value, game_frame = game_frame, subturn= subturn, upper_score = upper_score, reverse_probability_dict = reverse_probability_dict, scorecard_dict = scorecard_dict, prob_matrix = prob_matrix), range(len(reverse_probability_dict)))
         for k, roll in enumerate(reverse_probability_dict.keys()):
-            index = np.array(reverse_probability_dict[roll].values()) > 0
-            tmp_prob_matrix = prob_matrix[index,:]
-            for l, scorecard in enumerate(scorecard_dict.keys()):
-                max_expected_value = 0
-                tmp_fwd_scores = game_frame[subturn+1, upper_score, :, l]['score']
-                max_expected_value = np.max(np.dot(tmp_prob_matrix, tmp_fwd_scores))
-                game_frame[subturn, upper_score, k, l]["score"] = max_expected_value
+            for scorecard, scorecard_index in scorecard_dict.iteritems():
+                if MULTI:
+                    game_frame[subturn, upper_score, k, scorecard_index]["score"] = max_expected_values[k][scorecard]
+                else:
+                    game_frame[subturn, upper_score, k, scorecard_index]["score"] =roll_max_expected_value(roll, game_frame = game_frame, subturn= subturn, upper_score = upper_score, reverse_probability_dict = reverse_probability_dict, scorecard_dict = scorecard_dict, prob_matrix = prob_matrix)[scorecard]
+    if MULTI:
+        pool.close()
 
 def fill_turn(game_map, turn, reverse_probability_dict, forward_probability_dict, scorecard_dict, forward_scorecard_dicti, pre_calc_score_dict):
     game_frame = game_map[turn]
