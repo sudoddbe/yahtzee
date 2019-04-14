@@ -108,7 +108,19 @@ scoring_functions = [
     score_yahtzee,
 ]
 scoring_dict = dict(zip(keys, scoring_functions))
-def score_category(category_int, rolls):
+
+def pre_calc_scores(rolls):
+    pre_calc_score_dict = dict()
+    for roll in rolls:
+        pre_calc_score_dict[roll] = dict()
+        for category in scoring_dict.keys():
+            pre_calc_score_dict[roll][category] = score_category(category, roll)
+    return pre_calc_score_dict
+
+def score_category(category_int, rolls, pre_calc_score_dict = None):
+    if pre_calc_score_dict:
+        return pre_calc_score_dict[rolls][category_int]
+
     if category_int < 2**5 +1:
         score = scoring_dict[category_int](rolls)
         return (score, score)
