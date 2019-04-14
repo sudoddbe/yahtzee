@@ -123,13 +123,14 @@ if __name__ == "__main__":
     print "stop",stop
     print "start",start
     print "diff",diff
-    f = open("game_map", 'wb')
     import pickle
-    pickle.dump(game_map, f)
-    f.close()
     forward_probability_dict, reverse_probability_dict = dice_probability_dict()
     tmp_probability = np.array(forward_probability_dict[tuple()].values())
     tmp_scores = game_map[0][0, 0 ]
     tmp_scores = game_map[0][0, 0, :, 0]['score']
     expected_value = np.dot(tmp_probability, tmp_scores)
     print expected_value
+    for i,gm in enumerate(game_map):
+        f = open("game_map_%i"%i, 'wb')
+        pickle.dump(gm, f)
+        f.close()
