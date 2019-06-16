@@ -1,29 +1,9 @@
-#include <stdio.h>   
-#include <string.h>   
-#include <stdlib.h>   
-#include <stdbool.h>   
-#include <assert.h>   
-#include <math.h>   
-
-#define NBR_DICE (5)
-#if 1
+#include "yahtzee_probability_matrix.h"   
+#if 0
 #define DEBUG(x) (x)
 #else
 #define DEBUG(x)
 #endif
-struct roll {
-    unsigned char input_set_size;
-    unsigned char output_set_size;
-    unsigned char input_set[NBR_DICE];
-    unsigned char output_set[NBR_DICE];
-    double probability; 
-};
-
-struct prob_mat {
-    unsigned int rows;
-    unsigned int cols;
-    struct roll* rolls;
-};
 
 unsigned int n_choose_k(unsigned int n, unsigned int k)
 {
@@ -46,6 +26,29 @@ unsigned int n_choose_k(unsigned int n, unsigned int k)
     }
     return result/denominator;
 }
+
+bool roll_compare_sets(struct roll* a, struct roll* b)
+{
+    if (a->input_set_size != b->input_set_size){
+        return false;
+    }
+    if (a->output_set_size != b->output_set_size){
+        return false;
+    }
+    int i;
+    for( i=0; i<a->input_set_size; i++){
+        if(a->input_set[i] != b->input_set[i]){
+            return false;
+        }
+    }
+    for( i=0; i<a->output_set_size; i++){
+        if(a->output_set[i] != b->output_set[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
 
 void fill_roll_probability(struct roll* roll){
     //Set diff set is defined by the rolls that is in the output set but not in the input set.
@@ -198,24 +201,3 @@ void prob_mat_destory(struct prob_mat* matrix)
 }
 
 
-int main()
-{    
-    printf("%u \n", n_choose_k(3,1));
-    printf("%u \n", n_choose_k(3,2));
-    printf("%u \n", n_choose_k(3,3));
-    printf("%u \n", n_choose_k(10,5));
-    struct prob_mat* matrix = prob_mat_create();
-    printf("%u \n", matrix->rows);
-    printf("%u \n", matrix->cols);
-    prob_mat_destory(matrix);
-    //Create probability matrix
-    //Create index to input set matching
-    //Create index to output set matching
-    //Create score matrix with output_sets*category elements.
-    //Pre-calculate the score matrix
-    //Fill probability matrix
-    //Create game map
-    //Fill last turn
-    //backtrack till first turn
-    //TODO : Write unit test
-}
