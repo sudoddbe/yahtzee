@@ -7,14 +7,13 @@
 #include <stdbool.h>   
 #include <assert.h>   
 #include <math.h>   
-
-#define NBR_DICE (5)
+#include "yahtzee_constants.h"
 
 struct roll {
     unsigned char input_set_size;
     unsigned char output_set_size;
-    unsigned char input_set[NBR_DICE];
-    unsigned char output_set[NBR_DICE];
+    unsigned char input_set[NBR_DICES];
+    unsigned char output_set[NBR_DICES];
     double probability; 
 };
 

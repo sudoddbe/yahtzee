@@ -1,9 +1,4 @@
 #include "yahtzee_probability_matrix.h"   
-#if 0
-#define DEBUG(x) (x)
-#else
-#define DEBUG(x)
-#endif
 
 unsigned int n_choose_k(unsigned int n, unsigned int k)
 {
@@ -53,7 +48,7 @@ bool roll_compare_sets(struct roll* a, struct roll* b)
 void fill_roll_probability(struct roll* roll){
     //Set diff set is defined by the rolls that is in the output set but not in the input set.
     //This is the roll we would need on the undecided dice to exactly get the output set
-    unsigned char diff_set[NBR_DICE] = {0};
+    unsigned char diff_set[NBR_DICES] = {0};
     memcpy(diff_set, roll->output_set, sizeof(roll->output_set));
     int diff_set_size = roll->output_set_size;
     int i;
@@ -105,7 +100,7 @@ void fill_roll_probability(struct roll* roll){
 
 int fill_input_sets(struct roll* rolls, int row, int nbr_cols, int roll_pos, int current_max)
 {
-    if (roll_pos >= NBR_DICE){
+    if (roll_pos >= NBR_DICES){
         return row;
     }
     int i;
@@ -125,8 +120,8 @@ int fill_input_sets(struct roll* rolls, int row, int nbr_cols, int roll_pos, int
 
 int fill_output_sets(struct roll* rolls, int col, int roll_pos, int current_max)
 {
-    if (roll_pos >= NBR_DICE){
-        rolls[col].output_set_size = NBR_DICE;
+    if (roll_pos >= NBR_DICES){
+        rolls[col].output_set_size = NBR_DICES;
         return col+1;
     }
     int i;
@@ -146,7 +141,7 @@ struct prob_mat* prob_mat_create()
     unsigned int nbr_rows = 0;
     int i;
     int j;
-    for( i = NBR_DICE; i >= 0; i--){
+    for( i = NBR_DICES; i >= 0; i--){
         nbr_rows += n_choose_k(i + 6 - 1, i);
     }
     matrix->rows = nbr_rows;
@@ -154,7 +149,7 @@ struct prob_mat* prob_mat_create()
     matrix->rolls = malloc(nbr_rows*nbr_cols*sizeof(struct roll));
     int row = 0;
     int col = 0;
-    int input_size = NBR_DICE;
+    int input_size = NBR_DICES;
     fill_input_sets(matrix->rolls, 0, nbr_cols, 0, 6);
     fill_output_sets(matrix->rolls, 0, 0, 6);
     for (i =0; i<nbr_rows;i++){
@@ -186,7 +181,7 @@ struct prob_mat* prob_mat_create()
     DEBUG(printf("\n"));
     for (i =0; i<nbr_cols;i++){
         int rolli;
-        for(rolli=0; rolli < NBR_DICE; rolli++){
+        for(rolli=0; rolli < NBR_DICES; rolli++){
             DEBUG(printf("%d \t", matrix->rolls[i + 10*nbr_cols].output_set[rolli]));
         }
         DEBUG(printf("\n"));
