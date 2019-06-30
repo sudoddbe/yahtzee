@@ -24,6 +24,5 @@ clean:
 	rm -f $(ODIR)/*.o *~ core $(IDIR)/*~ YahtzeeGame
 check: $(OBJ) check/yahtzee_probability_check.c check/yahtzee_scorecard_check.c
 	gcc yahtzee_probability_matrix.c check/yahtzee_probability_check.c -o $(ODIR)/test_probability_matrix.o -lcheck -pthread -lcheck_pic -pthread -lrt -lm -lsubunit $(CFLAGS) 
-	./$(ODIR)/test_probability_matrix.o
 	gcc yahtzee_scorecard.c check/yahtzee_scorecard_check.c -o $(ODIR)/test_scorecard.o -lcheck -pthread -lcheck_pic -pthread -lrt -lm -lsubunit $(CFLAGS) 
-	./$(ODIR)/test_scorecard.o
+	./$(ODIR)/test_probability_matrix.o && ./$(ODIR)/test_scorecard.o
