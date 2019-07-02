@@ -1,5 +1,55 @@
-#include "yahtzee_scorecard.h"   
+#include "yahtzee_scorecard.h"
 #include "yahtzee_constants.h"
+
+int ones_in_scorecard(int scorecard)
+{
+    assert(scorecard < NBR_SCORECARDS);
+    int nbr_ones = 0;
+    while(scorecard > 0){
+        nbr_ones += scorecard & 1;
+        scorecard = scorecard >> 1;
+
+    }
+    return nbr_ones;
+}
+
+void find_scorecards_for_turn(int turn, int* dest, unsigned int* nbr_scorecards){
+    if (turn > NBR_CATEGORIES){
+        printf("INVALID TURN \n");
+        assert(false);
+    }
+    int index = 0;
+    int sc;
+    for( sc = 0; sc < NBR_SCORECARDS; sc++){
+        if( ones_in_scorecard(sc) == turn){
+            dest[index] = sc;
+            index++;
+            printf("Adding scorecard %i to turn %i \n", sc, turn);
+        }
+    }
+    *nbr_scorecards = index;
+}
+
+void find_forward_scorecard(int current_scorecard, int* dest, unsigned int *nbr_forward_scorecards)
+{
+    //mask is a bitmask with all zeros except one bit
+    int mask = (1 << (NBR_CATEGORIES - 1));
+    int i = 0;
+    while(mask > 0){
+        //Use bitwise and to check if category is filled in scorecard
+        int masked_bit = current_scorecard & mask;
+        //If the masked bit is 0 the category is not filled, i.e it can be filled to form a forward scorecard
+        if(masked_bit == 0){
+            //add mask to fill the cateogry (the one bit is in the correct place already)
+            int forward_scorecard = current_scorecard + mask;
+            dest[i] = forward_scorecard;
+            i++;
+        }
+        //Shift mask for next category
+        mask = mask >> 1;
+    }
+    *nbr_forward_scorecards = i;
+}
 
 void bin_count(unsigned char* rolls, unsigned char* bins)
 {

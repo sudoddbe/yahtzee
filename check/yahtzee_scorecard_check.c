@@ -177,6 +177,127 @@ START_TEST (test_all_scoring)
 }
 END_TEST;
 
+
+START_TEST (test_scorecards_for_turn)
+{
+    int scorecards[NBR_SCORECARDS] = {0};
+    int nbr_scorecards = 0;
+    find_scorecards_for_turn(0, scorecards, &nbr_scorecards);
+    fail_unless(nbr_scorecards == 1);
+    fail_unless(scorecards[0] == 0);
+
+    nbr_scorecards = 0;
+    find_scorecards_for_turn(1, scorecards, &nbr_scorecards);
+    fail_unless(nbr_scorecards == NBR_CATEGORIES);
+    int i;
+    int j;
+    for( i =0; i<NBR_CATEGORIES; i++){
+        int tmp_category = 1 << i;
+        bool found = false;
+        for(j=0; j<nbr_scorecards; j++){
+            if(scorecards[j] == tmp_category){
+                found = true;
+                break;
+            }
+        }
+        fail_unless(found);
+    }
+
+    nbr_scorecards = 0;
+    find_scorecards_for_turn(2, scorecards, &nbr_scorecards);
+    fail_unless(nbr_scorecards == (NBR_CATEGORIES)*(NBR_CATEGORIES-1)/2);
+    int k;
+    for( i =0; i<NBR_CATEGORIES; i++){
+        for( k =0; k<i; k++){
+            int tmp_category = (1 << i) + (1<<k);
+            bool found = false;
+            for(j=0; j<nbr_scorecards; j++){
+                if(scorecards[j] == tmp_category){
+                    found = true;
+                    break;
+                }
+            }
+            fail_unless(found);
+        }
+    }
+
+
+    nbr_scorecards = 0;
+    find_scorecards_for_turn(NBR_CATEGORIES, scorecards, &nbr_scorecards);
+    fail_unless(nbr_scorecards == 1);
+    fail_unless(scorecards[0] == (1<<NBR_CATEGORIES) -1);
+
+    nbr_scorecards = 0;
+    find_scorecards_for_turn(NBR_CATEGORIES - 1, scorecards, &nbr_scorecards);
+    fail_unless(nbr_scorecards == NBR_CATEGORIES);
+    for( i =0; i<NBR_CATEGORIES; i++){
+        int tmp_category = (1 << NBR_CATEGORIES) -1 - (1 << i);
+        bool found = false;
+        for(j=0; j<nbr_scorecards; j++){
+            if(scorecards[j] == tmp_category){
+                found = true;
+                break;
+            }
+        }
+        fail_unless(found);
+    }
+
+    //It should run for all turns without crashing...
+    for( i =0; i<NBR_CATEGORIES; i++){
+        find_scorecards_for_turn(i, scorecards, &nbr_scorecards);
+        fail_unless(nbr_scorecards < NBR_SCORECARDS);
+    }
+}
+END_TEST;
+
+START_TEST (test_forward_scorecards)
+{
+    int scorecards[NBR_SCORECARDS] = {0};
+    int nbr_scorecards = 0;
+    find_forward_scorecard(0, scorecards, &nbr_scorecards);
+
+    fail_unless(nbr_scorecards == NBR_CATEGORIES);
+    int i;
+    int j;
+    for( i =0; i<NBR_CATEGORIES; i++){
+        int tmp_scorecard = 1 << i;
+        bool found = false;
+        for(j=0; j<nbr_scorecards; j++){
+            if(scorecards[j] == tmp_scorecard){
+                found = true;
+                break;
+            }
+        }
+        fail_unless(found);
+    }
+
+    int k;
+    int current_scorecard = 0;
+    for( k = 0; k<NBR_CATEGORIES; k++){
+        nbr_scorecards = 0;
+        find_forward_scorecard(current_scorecard, scorecards, &nbr_scorecards);
+        fail_unless(nbr_scorecards == NBR_CATEGORIES - k);
+        for( i =k; i<NBR_CATEGORIES; i++){
+            int tmp_scorecard = current_scorecard + (1 << i) ;
+            bool found = false;
+            for(j=0; j<nbr_scorecards; j++){
+                if(scorecards[j] == tmp_scorecard){
+                    found = true;
+                    break;
+                }
+            }
+            fail_unless(found);
+        }
+        current_scorecard += (1<<k);
+    }
+    for( i = 0; i < NBR_SCORECARDS; i++){
+        find_forward_scorecard(i, scorecards, &nbr_scorecards);
+        fail_unless(nbr_scorecards <= NBR_CATEGORIES);
+    }
+
+}
+END_TEST;
+
 int main(void)
 {
     Suite *s1 = suite_create("Core");
@@ -185,6 +306,9 @@ int main(void)
     int nf;
     suite_add_tcase(s1, tc1_1);
     tcase_add_test(tc1_1, test_all_scoring);
+    tcase_add_test(tc1_1, test_scorecards_for_turn);
+    tcase_add_test(tc1_1, test_forward_scorecards);
+
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
     srunner_free(sr);
