@@ -48,7 +48,7 @@ START_TEST (test_probability_sum)
         }
     }
     fail_unless(found_matches == 5);
-    prob_mat_destory(matrix);
+    prob_mat_destroy(matrix);
 }
 END_TEST
 

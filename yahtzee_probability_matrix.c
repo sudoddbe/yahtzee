@@ -189,7 +189,7 @@ struct prob_mat* prob_mat_create()
     return matrix;
 }
 
-void prob_mat_destory(struct prob_mat* matrix)
+void prob_mat_destroy(struct prob_mat* matrix)
 {
     free(matrix->rolls);
     free(matrix);

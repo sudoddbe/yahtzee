@@ -29,6 +29,6 @@ void fill_roll_probability(struct roll* roll);
 int fill_input_sets(struct roll* rolls, int row, int nbr_cols, int roll_pos, int current_max);
 int fill_output_sets(struct roll* rolls, int col, int roll_pos, int current_max);
 struct prob_mat* prob_mat_create();
-void prob_mat_destory(struct prob_mat* matrix);
+void prob_mat_destroy(struct prob_mat* matrix);
 
 #endif /* YAHTZEE_PROBABILITY_MATRIX_H_ */
