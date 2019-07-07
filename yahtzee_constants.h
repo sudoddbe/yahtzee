@@ -6,7 +6,7 @@
 #define NBR_CATEGORIES (15)
 #define NBR_SCORECARDS ((1<<NBR_CATEGORIES))
 #define NBR_REROLLS (3)
-#define EXTRA_SCORE_THRESH (63)
+#define MAX_UPPER_SCORE (64)
 #if 0
 #define DEBUG(x) (x)
 #else

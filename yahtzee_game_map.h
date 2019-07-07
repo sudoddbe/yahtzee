@@ -12,6 +12,7 @@
 struct game_map {
     struct prob_mat* prob_mat;
     float* score_map;
+    int* category_score_map; //NBR_CATEGORY * (nbr of 5 dice roll) map of precalculated scoring values for all categories
 };
 
 #endif /* YAHTZEE_GAME_MAP_H_ */
