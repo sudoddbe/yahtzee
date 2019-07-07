@@ -236,8 +236,8 @@ int (*fun_pointer[NBR_CATEGORIES]) (unsigned char*) = {
 };
 
 /* Have to handle top-half-score for bonus on receiving end */
-int score_category(int category_int, unsigned char* rolls)
+int score_category(int category_index, unsigned char* rolls)
 {
-    return fun_pointer[category_int](rolls);
+    return fun_pointer[category_index](rolls);
 }
 
