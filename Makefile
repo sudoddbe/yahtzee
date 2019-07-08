@@ -1,6 +1,6 @@
 IDIR =.
 CC=gcc
-CFLAGS=-I$(IDIR) -fopenmp
+CFLAGS=-I$(IDIR) -fopenmp -O3
 
 ODIR=obj
 LDIR =../lib
