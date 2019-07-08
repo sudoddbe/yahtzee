@@ -57,12 +57,44 @@ int precalculate_scores(struct game_map* gm)
     }
 }
 
+void precalculate_forward_scorecards(struct game_map* gm)
+{
+    int scorecard;
+    for(scorecard = 0; scorecard <NBR_SCORECARDS; scorecard++){
+        int forward_scorecards[NBR_CATEGORIES];
+        unsigned int nbr_forward_scorecards = 0;
+        find_forward_scorecard(scorecard, forward_scorecards, &nbr_forward_scorecards);
+        int i;
+        for(i = 0; i < nbr_forward_scorecards; i++){
+            gm->forward_scorecards[scorecard*NBR_CATEGORIES + i] = forward_scorecards[i];
+        }
+        gm->nbr_forward_scorecards[scorecard] = nbr_forward_scorecards;
+    }
+}
+
+void get_forward_scorecards(struct game_map* gm, int scorecard, int** forward_scorecards, unsigned int* nbr_forward_scorecards )
+{
+   *forward_scorecards = &(gm->forward_scorecards[scorecard*NBR_CATEGORIES]);
+   *nbr_forward_scorecards = gm->nbr_forward_scorecards[scorecard];
+}
+
+void strip_probability_map(struct game_map* gm)
+{
+    int prob_row;
+    int prob_col;
+    for(prob_row = 0; prob_row < gm->prob_mat->rows; prob_row++){
+        for(prob_col = 0; prob_col < gm->prob_mat->cols; prob_col++){
+            gm->stripped_prob_mat[prob_row*gm->prob_mat->cols + prob_col] = gm->prob_mat->rolls[prob_row*gm->prob_mat->cols + prob_col].probability;
+        }
+    }
+}
+
 float scorecard_max_expected_value(struct game_map* gm, int scorecard, int us_index, int roll_index, int subturn)
 {
     float max_value = 0;
-    int forward_scorecards[NBR_CATEGORIES] = {0};
+    int* forward_scorecards;
     unsigned int nbr_forward_scorecards = 0;
-    find_forward_scorecard(scorecard, forward_scorecards, &nbr_forward_scorecards);
+    get_forward_scorecards(gm, scorecard, &forward_scorecards, &nbr_forward_scorecards);
     int sc_index;
     int prob_col;
     struct roll* rolls = gm->prob_mat->rolls;
@@ -78,7 +110,7 @@ float scorecard_max_expected_value(struct game_map* gm, int scorecard, int us_in
         float expected_value = 0;
         for(prob_col = 0; prob_col<gm->prob_mat->cols; prob_col++){
             int index = get_index(fwd_scorecard, prob_col, 0, tmp_upper_score);
-            expected_value += rolls[(gm->prob_mat->rows - 1)*gm->prob_mat->cols + prob_col].probability * gm->score_map[index];
+            expected_value += gm->stripped_prob_mat[(gm->prob_mat->rows - 1)*gm->prob_mat->cols + prob_col] * gm->score_map[index];
         }
         expected_value += score;
         if (expected_value > max_value){
@@ -111,15 +143,14 @@ float roll_max_expected_value(struct game_map* gm, int sc_index, int us_index, i
     int prob_row;
     int prob_col;
     float max_value = 0;
-    struct roll* rolls = gm->prob_mat->rolls;
     for(prob_row =0; prob_row<gm->prob_mat->rows; prob_row++){
-        if(rolls[prob_row*gm->prob_mat->cols + roll_index].probability <= 0){
+        if(gm->stripped_prob_mat[prob_row*gm->prob_mat->cols + roll_index] <= 0){
             continue;
         }
         float expected_value = 0;
         for(prob_col =0; prob_col<gm->prob_mat->cols; prob_col++){
             int index = get_index(sc_index, prob_col, subturn + 1, us_index);
-            expected_value += rolls[prob_row*gm->prob_mat->cols + prob_col].probability * gm->score_map[index];
+            expected_value += gm->stripped_prob_mat[prob_row*gm->prob_mat->cols + prob_col] * gm->score_map[index];
         }
         if(expected_value > max_value){
             max_value = expected_value;
@@ -206,7 +237,12 @@ struct game_map* yahtzee_game_map_create()
     gm->prob_mat = prob_mat_create();
     gm->score_map = calloc(NBR_SCORECARDS * gm->prob_mat->cols * NBR_REROLLS * MAX_UPPER_SCORE, sizeof(*(gm->score_map)));
     gm->category_score_map = calloc(NBR_CATEGORIES * gm->prob_mat->cols, sizeof(*(gm->category_score_map)));
+    gm->forward_scorecards = calloc(NBR_SCORECARDS * NBR_CATEGORIES, sizeof(*(gm->forward_scorecards)));
+    gm->nbr_forward_scorecards = calloc(NBR_SCORECARDS, sizeof(*(gm->nbr_forward_scorecards)));
+    gm->stripped_prob_mat = calloc(gm->prob_mat->rows * gm->prob_mat->cols, sizeof(*(gm->stripped_prob_mat)));
     precalculate_scores(gm);
+    precalculate_forward_scorecards(gm);
+    strip_probability_map(gm);
     return gm;
 }
 
