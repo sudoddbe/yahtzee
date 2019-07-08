@@ -1,3 +1,4 @@
+#include <omp.h>
 #include "yahtzee_game_map.h"
 #include "yahtzee_probability_matrix.h"
 #include "yahtzee_scorecard.h"
@@ -93,10 +94,11 @@ void fill_select_subturn(struct game_map* gm, int turn, int* scorecards, unsigne
     int sc_index;
     int roll_index;
     int us_index;
-    for( sc_index = 0; sc_index < nbr_scorecards; sc_index++){
-        int scorecard = scorecards[sc_index];
-        for( roll_index = 0; roll_index < gm->prob_mat->cols; roll_index++){
-            for( us_index = 0; us_index < MAX_UPPER_SCORE; us_index++){
+    for( us_index = 0; us_index < MAX_UPPER_SCORE; us_index++){
+        for( sc_index = 0; sc_index < nbr_scorecards; sc_index++){
+            int scorecard = scorecards[sc_index];
+#pragma omp parallel for
+            for( roll_index = 0; roll_index < gm->prob_mat->cols; roll_index++){
                 int index = get_index(scorecard, roll_index, reroll_index, us_index);
                 gm->score_map[index] = scorecard_max_expected_value(gm, scorecard, us_index, roll_index, reroll_index);
             }
@@ -131,10 +133,11 @@ void fill_roll_subturn(struct game_map* gm, int turn, int reroll_index, int* sco
     int sc_index;
     int roll_index;
     int us_index;
-    for( sc_index = 0; sc_index < nbr_scorecards; sc_index++){
-        int scorecard = scorecards[sc_index];
-        for( roll_index = 0; roll_index < gm->prob_mat->cols; roll_index++){
-            for( us_index = 0; us_index < MAX_UPPER_SCORE; us_index++){
+    for( us_index = 0; us_index < MAX_UPPER_SCORE; us_index++){
+        for( sc_index = 0; sc_index < nbr_scorecards; sc_index++){
+            int scorecard = scorecards[sc_index];
+#pragma omp parallel for
+            for( roll_index = 0; roll_index < gm->prob_mat->cols; roll_index++){
                 int index = get_index(scorecard, roll_index, reroll_index, us_index);
                 gm->score_map[index] = roll_max_expected_value(gm, scorecard, us_index, roll_index, reroll_index);
             }
