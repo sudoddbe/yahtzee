@@ -8,7 +8,7 @@
 //Shameless temporary define
 int get_index(int scorecard_index, int roll_index, int reroll_index, int upper_score_index)
 {
-#if 1
+#if 0
     assert(scorecard_index < NBR_SCORECARDS);
     assert(roll_index < NBR_ROLLS);
     assert(reroll_index < NBR_REROLLS);
@@ -223,7 +223,7 @@ void fill_end_turn(struct game_map* gm)
             }
         }
     }
-    
+
     reroll_index = NBR_REROLLS - 2;
     while (reroll_index >= 0){
         fill_roll_subturn(gm, NBR_CATEGORIES -1, reroll_index, scorecards, nbr_scorecards);
@@ -273,5 +273,85 @@ int main(void)
         printf(" Roll : %u, %u, %u, %u, %u, \t score : %4.8f \n", tmp.output_set[0], tmp.output_set[1], tmp.output_set[2], tmp.output_set[3], tmp.output_set[4], gm->score_map[index]);
     }
     printf("Expected value : %8.6f\n", expected_value);
+
+    FILE *outfile;
+
+    // open file for writing
+    outfile = fopen ("output/yahtzee_table", "w");
+    if (outfile == NULL)
+    {
+        fprintf(stderr, "\nError opend file\n");
+        exit (1);
+    }
+
+
+    // write struct to file
+    int upper_score;
+    int reroll_index;
+    for(reroll_index = 0; reroll_index < NBR_REROLLS; reroll_index++){
+        for(upper_score = 0; upper_score < MAX_UPPER_SCORE; upper_score++){
+            int index = 0;
+            index += reroll_index * (MAX_UPPER_SCORE*NBR_SCORECARDS*NBR_ROLLS);
+            index += upper_score * (NBR_SCORECARDS*NBR_ROLLS);
+            fwrite(gm->score_map + index, sizeof(float), NBR_SCORECARDS*NBR_ROLLS, outfile);
+        }
+    }
+    // close file
+    fclose (outfile);
+
+    outfile = fopen ("output/yahtzee_forward_scorecards", "w");
+    //Write all forward scorecards, including the zeros at the end, since no scorecard has 0 as a forward we can use this in python later
+    //The zeros comes from allocating with calloc
+    fwrite(gm->forward_scorecards, sizeof(*(gm->forward_scorecards)), NBR_SCORECARDS*NBR_CATEGORIES, outfile);
+    fclose (outfile);
+
+    int* category_score_map;
+
+    outfile = fopen ("output/yahtzee_category_scores", "w");
+    //Write all forward scorecards, including the zeros at the end, since no scorecard has 0 as a forward we can use this in python later
+    //The zeros comes from allocating with calloc
+    fwrite(gm->category_score_map, sizeof(*(gm->category_score_map)), NBR_CATEGORIES*gm->prob_mat->cols, outfile);
+    fclose (outfile);
+
+    outfile = fopen ("output/yahtzee_probability_matrix", "w");
+    fwrite(gm->stripped_prob_mat, sizeof(*(gm->stripped_prob_mat)), gm->prob_mat->rows * gm->prob_mat->cols, outfile);
+    fclose (outfile);
+
+    outfile = fopen ("output/input_rolls", "w");
+    int row;
+    for(row = 0; row < gm->prob_mat->rows; row++){
+        unsigned char* input_rolls = gm->prob_mat->rolls[row*gm->prob_mat->cols].input_set;
+        unsigned char input_size = gm->prob_mat->rolls[row*gm->prob_mat->cols].input_set_size;
+        int roll_index;
+        for(roll_index = 0; roll_index < input_size; roll_index++){
+            fprintf(outfile, "%u ", input_rolls[roll_index]);
+        }
+        fprintf(outfile, "\n");
+    }
+    fclose (outfile);
+
+    outfile = fopen ("output/output_rolls", "w");
+    int col;
+    for(col = 0; col < gm->prob_mat->cols; col++){
+        unsigned char* output_rolls = gm->prob_mat->rolls[col].output_set;
+        unsigned char output_size = gm->prob_mat->rolls[col].output_set_size;
+        int roll_index;
+        for(roll_index = 0; roll_index < output_size; roll_index++){
+            fprintf(outfile, "%u ", output_rolls[roll_index]);
+        }
+        fprintf(outfile, "\n");
+    }
+    fclose (outfile);
+
+    outfile = fopen ("output/yahtzee_constants.py", "w");
+
+    fprintf(outfile, "NBR_DICES = %i\n", NBR_DICES);
+    fprintf(outfile, "NBR_FACES = %i\n", NBR_FACES);
+    fprintf(outfile, "NBR_CATEGORIES = %i\n", NBR_CATEGORIES);
+    fprintf(outfile, "NBR_SCORECARDS = %i\n", NBR_SCORECARDS);
+    fprintf(outfile, "NBR_REROLLS = %i\n", NBR_REROLLS);
+    fprintf(outfile, "MAX_UPPER_SCORE = %i\n", MAX_UPPER_SCORE);
+    fclose (outfile);
     yahtzee_game_map_destroy(gm);
+    return 0;
 }
