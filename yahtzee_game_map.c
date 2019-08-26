@@ -351,6 +351,7 @@ int main(void)
     fprintf(outfile, "NBR_SCORECARDS = %i\n", NBR_SCORECARDS);
     fprintf(outfile, "NBR_REROLLS = %i\n", NBR_REROLLS);
     fprintf(outfile, "MAX_UPPER_SCORE = %i\n", MAX_UPPER_SCORE);
+    fprintf(outfile, "NBR_ROLLS = %i\n", NBR_ROLLS);
     fclose (outfile);
     yahtzee_game_map_destroy(gm);
     return 0;
