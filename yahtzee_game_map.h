@@ -13,6 +13,7 @@ struct game_map {
     struct prob_mat* prob_mat;
     float* stripped_prob_mat;
     float* score_map;
+    short* best_moves;
     int* forward_scorecards;
     unsigned int* nbr_forward_scorecards;
     int* category_score_map; //NBR_CATEGORY * (nbr of 5 dice roll) map of precalculated scoring values for all categories

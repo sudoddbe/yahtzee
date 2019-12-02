@@ -89,7 +89,7 @@ void strip_probability_map(struct game_map* gm)
     }
 }
 
-float scorecard_max_expected_value(struct game_map* gm, int scorecard, int us_index, int roll_index, int subturn)
+float scorecard_max_expected_value(struct game_map* gm, int scorecard, int us_index, int roll_index, int subturn, int* best_move)
 {
     float max_value = 0;
     int* forward_scorecards;
@@ -115,6 +115,7 @@ float scorecard_max_expected_value(struct game_map* gm, int scorecard, int us_in
         expected_value += score;
         if (expected_value > max_value){
             max_value = expected_value;
+            *best_move = category_index;
         }
     }
     return max_value;
@@ -132,13 +133,15 @@ void fill_select_subturn(struct game_map* gm, int turn, int* scorecards, unsigne
 #pragma omp parallel for
             for( roll_index = 0; roll_index < gm->prob_mat->cols; roll_index++){
                 int index = get_index(scorecard, roll_index, reroll_index, us_index);
-                gm->score_map[index] = scorecard_max_expected_value(gm, scorecard, us_index, roll_index, reroll_index);
+                int best_move = 0;
+                gm->score_map[index] = scorecard_max_expected_value(gm, scorecard, us_index, roll_index, reroll_index, &best_move);
+                gm->best_moves[index] = best_move;
             }
         }
     }
 }
 
-float roll_max_expected_value(struct game_map* gm, int sc_index, int us_index, int roll_index, int subturn)
+float roll_max_expected_value(struct game_map* gm, int sc_index, int us_index, int roll_index, int subturn, int* best_move)
 {
     int prob_row;
     int prob_col;
@@ -154,6 +157,7 @@ float roll_max_expected_value(struct game_map* gm, int sc_index, int us_index, i
         }
         if(expected_value > max_value){
             max_value = expected_value;
+            *best_move = prob_row;
         }
     }
     return max_value;
@@ -170,7 +174,9 @@ void fill_roll_subturn(struct game_map* gm, int turn, int reroll_index, int* sco
 #pragma omp parallel for
             for( roll_index = 0; roll_index < gm->prob_mat->cols; roll_index++){
                 int index = get_index(scorecard, roll_index, reroll_index, us_index);
-                gm->score_map[index] = roll_max_expected_value(gm, scorecard, us_index, roll_index, reroll_index);
+                int best_move = 0;
+                gm->score_map[index] = roll_max_expected_value(gm, scorecard, us_index, roll_index, reroll_index, &best_move);
+                gm->best_moves[index] = best_move;
             }
         }
     }
@@ -220,6 +226,7 @@ void fill_end_turn(struct game_map* gm)
                 }
                 int index = get_index(scorecard, roll_index, reroll_index, us_index);
                 gm->score_map[index] = score;
+                gm->best_moves[index] = category_index;
             }
         }
     }
@@ -236,6 +243,7 @@ struct game_map* yahtzee_game_map_create()
     struct game_map* gm= calloc(1, sizeof(*gm));
     gm->prob_mat = prob_mat_create();
     gm->score_map = calloc(NBR_SCORECARDS * gm->prob_mat->cols * NBR_REROLLS * MAX_UPPER_SCORE, sizeof(*(gm->score_map)));
+    gm->best_moves = calloc(NBR_SCORECARDS * gm->prob_mat->cols * NBR_REROLLS * MAX_UPPER_SCORE, sizeof(*(gm->best_moves)));
     gm->category_score_map = calloc(NBR_CATEGORIES * gm->prob_mat->cols, sizeof(*(gm->category_score_map)));
     gm->forward_scorecards = calloc(NBR_SCORECARDS * NBR_CATEGORIES, sizeof(*(gm->forward_scorecards)));
     gm->nbr_forward_scorecards = calloc(NBR_SCORECARDS, sizeof(*(gm->nbr_forward_scorecards)));
@@ -277,7 +285,7 @@ int main(void)
     FILE *outfile;
 
     // open file for writing
-    outfile = fopen ("output/yahtzee_table", "w");
+    outfile = fopen ("output/yahtzee_score_table", "w");
     if (outfile == NULL)
     {
         fprintf(stderr, "\nError opend file\n");
@@ -294,6 +302,26 @@ int main(void)
             index += reroll_index * (MAX_UPPER_SCORE*NBR_SCORECARDS*NBR_ROLLS);
             index += upper_score * (NBR_SCORECARDS*NBR_ROLLS);
             fwrite(gm->score_map + index, sizeof(float), NBR_SCORECARDS*NBR_ROLLS, outfile);
+        }
+    }
+    // close file
+    fclose (outfile);
+
+    // open file for writing
+    outfile = fopen ("output/yahtzee_best_move_table", "w");
+    if (outfile == NULL)
+    {
+        fprintf(stderr, "\nError opend file\n");
+        exit (1);
+    }
+
+    // write struct to file
+    for(reroll_index = 0; reroll_index < NBR_REROLLS; reroll_index++){
+        for(upper_score = 0; upper_score < MAX_UPPER_SCORE; upper_score++){
+            int index = 0;
+            index += reroll_index * (MAX_UPPER_SCORE*NBR_SCORECARDS*NBR_ROLLS);
+            index += upper_score * (NBR_SCORECARDS*NBR_ROLLS);
+            fwrite(gm->best_moves + index, sizeof(short), NBR_SCORECARDS*NBR_ROLLS, outfile);
         }
     }
     // close file
