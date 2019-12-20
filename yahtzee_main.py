@@ -10,6 +10,18 @@ def get_index(scorecard, roll_index, subturn, upper_score):
     index +=  roll_index
     return index
 
+def get_input_from_index(index):
+    tmp = index
+    subturn = index / (MAX_UPPER_SCORE*NBR_SCORECARDS*NBR_ROLLS)
+    index -= subturn * (MAX_UPPER_SCORE*NBR_SCORECARDS*NBR_ROLLS)
+    upper_score = index / (NBR_SCORECARDS*NBR_ROLLS)
+    index -= upper_score * (NBR_SCORECARDS*NBR_ROLLS)
+    scorecard =  index / (NBR_ROLLS)
+    index -=  scorecard * (NBR_ROLLS)
+    roll_index =  index
+    #assert(np.all(get_index(scorecard, roll_index, subturn, upper_score) == tmp))
+    return (scorecard, roll_index, subturn, upper_score)
+
 def find_best_move_roll(subturn, upper_score, scorecard, roll_index, score_map, probability_matrix, input_rolls, output_rolls):
     best_move = None
     max_expected_value = 0
@@ -71,8 +83,9 @@ def load_all_matrices():
 
     category_scores = np.fromfile("output/yahtzee_category_scores", dtype="int32")
     category_scores = np.reshape(category_scores, (NBR_CATEGORIES, len(output_rolls)))
-    score_map = np.memmap("output/yahtzee_table", dtype='float32', mode='r')
-    return (input_rolls, output_rolls, forward_scorecards, probability_matrix, category_scores, score_map)
+    score_map = np.memmap("output/yahtzee_score_table", dtype='float32', mode='r')
+    best_moves = np.memmap("output/yahtzee_best_move_table", dtype='int16', mode='r')
+    return (input_rolls, output_rolls, forward_scorecards, probability_matrix, category_scores, score_map, best_moves)
 
 if __name__ == "__main__":
     category_names= ["ones", "twos", "threes", "fours", "fives", "sixes", "two_of_a_kind", "three_of_a_kind", "four_of_a_kind", "two_pair", "full_house", "small_straight", "large_straight", "chance", "yahtzee"]
@@ -82,7 +95,7 @@ if __name__ == "__main__":
     turn = 0
     score = 0
 
-    (input_rolls, output_rolls, forward_scorecards, probability_matrix, category_score, score_map) = load_all_matrices()
+    (input_rolls, output_rolls, forward_scorecards, probability_matrix, category_score, score_map, best_moves) = load_all_matrices()
     for turn in range(NBR_CATEGORIES):
         for subturn in range(NBR_REROLLS):
             while(True):
@@ -96,9 +109,11 @@ if __name__ == "__main__":
             roll_index = output_rolls.index(roll)
             print roll_index
             if(subturn < NBR_REROLLS -1):
+                index = get_index(scorecard, roll_index, subturn, upper_score)
                 best_move, expected_value = find_best_move_roll(subturn, upper_score, scorecard, roll_index, score_map, probability_matrix, input_rolls, output_rolls)
                 print " Best move is to save the these dices: "
                 print best_move
+                print input_rolls[best_moves[index]]
                 print "Expected value is ",(score + expected_value)
             else:
                 best_move, expected_value, added_upper_score = find_best_move_choose(subturn, upper_score, scorecard, roll_index, score_map, probability_matrix, forward_scorecards[scorecard], category_score)
